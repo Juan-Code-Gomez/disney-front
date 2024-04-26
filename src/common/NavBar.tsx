@@ -20,6 +20,15 @@ function NavBar() {
     navigate("/character");
   };
 
+  const handleMoviesClick = () => {
+    navigate("/movies");
+  };
+
+  const closeSession = () => {
+    localStorage.removeItem('token');
+    navigate('/');
+  }
+
   return (
     <>
       <Box sx={{ flexGrow: 1 }}>
@@ -53,9 +62,14 @@ function NavBar() {
                 </Grid>
                 <Grid item>
                   <Stack direction="row" spacing={2}>
-                    <Button variant="contained">Peliculas</Button>
+                    <Button variant="contained" onClick={handleMoviesClick}>
+                      Peliculas
+                    </Button>
                     <Button variant="contained" onClick={handleCharactersClick}>
                       Personajes
+                    </Button>
+                    <Button variant="contained" onClick={closeSession}>
+                      Cerrar Sesion
                     </Button>
                   </Stack>
                 </Grid>
