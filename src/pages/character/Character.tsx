@@ -13,12 +13,40 @@ import {
   Typography,
 } from "@mui/material";
 
+import ModalComponent from "../../common/ModalComponent";
+
 function Character() {
   const [characters, setCharacters] = useState<Characters[]>([]);
   const [filters, setFilters] = useState({
     name: "",
     age: "" as string | number,
   });
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalContent, setModalContent] = useState("");
+  const [modalTitle, setModalTitle] = useState("");
+  const [modalImage, setModalImage] = useState("");
+  const [modalHistory, setModalHistory] = useState("");
+
+  const openModal = (title: string, content: string, image:string, history: string) => {
+    console.log(image, 'image');
+    
+    setModalTitle(title);
+    setModalContent(content);
+    setModalOpen(true);
+    setModalImage(image)
+    setModalHistory(history)
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+  };
+
+  const handleCardClick = (character: Characters) => {
+    console.log(character, 'character');
+    
+            openModal(character.name,   `Película: ${character.movie}\nEdad: ${character.age}`, character.image, character.history);
+  };
 
   const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setFilters({ ...filters, name: event.target.value });
@@ -103,7 +131,7 @@ function Character() {
           <>
             {characters.map((character) => (
               <Grid item xs={12} sm={6} md={4} lg={3} key={character.id}>
-                <Card>
+                <Card onClick={() => handleCardClick(character)}>
                   <CardMedia
                     component="img"
                     height="200"
@@ -128,6 +156,14 @@ function Character() {
           </>
         )}
       </Grid>
+      <ModalComponent
+        open={modalOpen}
+        onClose={closeModal}
+        title={modalTitle}
+        image={modalImage}
+        content={modalContent}
+        history={modalHistory}
+      />
     </>
   );
 }
