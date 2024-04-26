@@ -9,14 +9,22 @@ import {
   Typography,
 } from "@mui/material";
 
+import { useNavigate } from "react-router-dom";
+
 import logoDisney from "../assets/Disney_Logo_Letras_Blancas.png";
 
 function NavBar() {
+  const navigate = useNavigate();
+  const handleCharactersClick = () => {
+    // Navega a la ruta '/character' cuando se hace clic en el botón
+    navigate("/character");
+  };
+
   return (
     <>
-      <Box sx={{ flexGrow: 1 }} >
-        <AppBar position="fixed" >
-          <Toolbar >
+      <Box sx={{ flexGrow: 1 }}>
+        <AppBar position="fixed">
+          <Toolbar>
             <Container maxWidth="xl">
               <Grid
                 container
@@ -46,7 +54,9 @@ function NavBar() {
                 <Grid item>
                   <Stack direction="row" spacing={2}>
                     <Button variant="contained">Peliculas</Button>
-                    <Button variant="contained">Personajes</Button>
+                    <Button variant="contained" onClick={handleCharactersClick}>
+                      Personajes
+                    </Button>
                   </Stack>
                 </Grid>
               </Grid>
