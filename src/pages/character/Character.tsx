@@ -87,14 +87,14 @@ function Character() {
         mb={12}
         mt={10}
         sx={{
-          backgroundColor: "#0682f0",
+          backgroundColor: "#1d1f2b",
           p: 2,
           position: "sticky",
           zIndex: 10,
         }}
       >
         <p>Filtros</p>
-        <Toolbar>
+        <Toolbar sx={{display: "flex", gap: 2, alignItems: "center"}}>
           <TextField
             label="Buscar por nombre"
             variant="outlined"
@@ -137,6 +137,7 @@ function Character() {
                     height="200"
                     image={character.image}
                     alt={character.name}
+                    sx={{objectFit: "fill"}}
                   />
                   <CardContent>
                     <Typography variant="h6">{character.name}</Typography>
@@ -147,7 +148,7 @@ function Character() {
                       Pelicula: {character.movie}
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
-                      Pelicula: {character.age}
+                      Edad: {character.age}
                     </Typography>
                   </CardContent>
                 </Card>

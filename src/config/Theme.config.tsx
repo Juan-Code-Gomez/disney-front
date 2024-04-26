@@ -8,7 +8,8 @@ type ThemeProp = {
 export enum themePalette {
     BG = "#040714",
     LIME = "#C8FA5F",
-    FONT_GLOBAL = "'JetBrains Mono', monospace"
+    FONT_GLOBAL = "'JetBrains Mono', monospace",
+    BUTTON = "#6421ff"
 }
  
 const theme = createTheme({
@@ -19,6 +20,9 @@ const theme = createTheme({
         },
         primary: {
             main: themePalette.LIME,
+        },
+        secondary: {
+            main: themePalette.BUTTON,
         },
     },
     typography: {
@@ -40,6 +44,15 @@ const theme = createTheme({
                     backgroundColor: themePalette.BG, // Cambia esto al color que quieras
                 },
             },
+        },
+
+        MuiCard: {
+            styleOverrides: {
+                root:{
+                    width: "15rem",
+                    height: "25rem"
+                }
+            }
         }
     }
 });

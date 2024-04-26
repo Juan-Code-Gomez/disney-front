@@ -20,6 +20,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs";
+import StarRating from "../common/StarRating";
 
 function Home() {
   const [movies, setMovies] = useState<Movie[]>([]);
@@ -46,7 +47,7 @@ function Home() {
   const handleClearFilters = () => {
     // Restablece los filtros a sus valores predeterminados
     setFilters({ search: "", date: null, rating: "" });
-};
+  };
 
   useEffect(() => {
     const queryParams = new URLSearchParams();
@@ -59,19 +60,21 @@ function Home() {
     if (filters.rating !== "") {
       queryParams.append("rating", filters.rating.toString());
     }
+    const getMovies = setTimeout(() => {
+      API.get<Movie[]>(`/movie?${queryParams.toString()}`)
+        .then((resp) => {
+          console.log(resp.data, "");
 
-    API.get<Movie[]>(`/movie?${queryParams.toString()}`)
-      .then((resp) => {
-        console.log(resp.data, "");
+          if (resp.data.length) {
+          }
 
-        if (resp.data.length) {
-        }
-
-        setMovies(resp.data);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+          setMovies(resp.data);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    }, 250);
+    return () => clearTimeout(getMovies);
   }, [filters]);
 
   return (
@@ -81,20 +84,19 @@ function Home() {
           mb={12}
           mt={10}
           sx={{
-            backgroundColor: "#0682f0",
+            backgroundColor: "#1d1f2b",
             p: 2,
             position: "sticky",
             zIndex: 10,
           }}
         >
           <p>Filtros</p>
-          <Toolbar>
+          <Toolbar sx={{ display: "flex", gap: 2, alignItems: "center" }}>
             <TextField
               label="Buscar por titulo"
               variant="outlined"
               value={filters.search}
               onChange={handleSearchChange}
-              margin="normal"
             />
 
             <Select
@@ -117,17 +119,16 @@ function Home() {
                 label="Fecha"
                 value={dayjs(filters.date)}
                 onChange={handleDateChange}
-                
               />
             </LocalizationProvider>
             <Button
-                            variant="contained"
-                            color="secondary"
-                            onClick={handleClearFilters}
-                            style={{ marginLeft: 10 }}
-                        >
-                            Limpiar filtros
-                        </Button>
+              variant="contained"
+              color="secondary"
+              onClick={handleClearFilters}
+              style={{ marginLeft: 10 }}
+            >
+              Limpiar filtros
+            </Button>
           </Toolbar>
         </Box>
         <Grid container spacing={2}>
@@ -145,14 +146,31 @@ function Home() {
                       height="200"
                       image={movie.image}
                       alt={movie.title}
+                      sx={{ objectFit: "fill" }}
                     />
-                    <CardContent>
-                      <Typography variant="h6">{movie.title}</Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        Calificacion: {movie.rating}
+                    <CardContent
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 0.2,
+                      }}
+                    >
+                      <Typography
+                        sx={{
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                        variant="h6"
+                      >
+                        {movie.title}
                       </Typography>
                       <Typography variant="body2" color="textSecondary">
-                        Fecha de lanzamiento: {movie.date_created}
+                        Calificacion: <StarRating rating={movie.rating} />
+                      </Typography>
+                      <Typography variant="body2" color="textSecondary">
+                        Fecha de lanzamiento: <br />
+                        {movie.date_created}
                       </Typography>
                       <Typography variant="body2" color="textSecondary">
                         Personajes: {movie.character}
