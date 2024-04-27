@@ -11,6 +11,7 @@ import API from "../../API";
 import logoDisney from "../../assets/Disney_Logo_Letras_Blancas.png";
 import { useNavigate } from "react-router-dom";
 
+
 function Login() {
   const navigate = useNavigate();
   const [userLogin, setUsrlogin] = useState("");
@@ -92,6 +93,11 @@ function Login() {
               Regístrate
             </Button>
           </Box>
+        </Box>
+        <Box mt={2} textAlign="center">
+          <Typography variant="body2" color="textSecondary">
+            Versión de la aplicación: 1.0.0
+          </Typography>
         </Box>
       </Container>
     </>
