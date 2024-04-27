@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Modal, TextField, Button, Typography } from "@mui/material";
+import { Modal, TextField, Button, Typography, Box } from "@mui/material";
 import API from "../API";
 import { Characters } from "../interface/Character";
 
@@ -21,9 +21,8 @@ function CreateCharacterModal({
   open,
   onClose,
   onSave,
-  character
+  character,
 }: CreateCharacterModalProps) {
-
   useEffect(() => {
     if (character) {
       setNewCharacter({
@@ -64,7 +63,10 @@ function CreateCharacterModal({
     if (character) {
       // Lógica para actualizar un personaje existente
       try {
-        const response = await API.put(`/character/${character.id}`, newCharacter);
+        const response = await API.put(
+          `/character/${character.id}`,
+          newCharacter
+        );
         if (response.status === 200) {
           onSave(newCharacter);
           onClose();
@@ -88,7 +90,16 @@ function CreateCharacterModal({
 
   return (
     <Modal open={open} onClose={onClose}>
-      <div style={{ padding: "20px", backgroundColor: "#1d1f2b" }}>
+      <Box
+        sx={{
+          padding: 4,
+          backgroundColor: "#1d1f2b",
+          margin: "auto",
+          marginTop: "10%",
+          width: 400,
+          borderRadius: 4,
+        }}
+      >
         <Typography variant="h6">Crear Personaje</Typography>
 
         <TextField
@@ -149,10 +160,15 @@ function CreateCharacterModal({
         <Button onClick={handleSave} variant="contained" color="primary">
           Guardar
         </Button>
-        <Button sx={{ margin: "12px" }} variant="contained" color="primary" onClick={onClose}>
+        <Button
+          sx={{ margin: "12px" }}
+          variant="contained"
+          color="primary"
+          onClick={onClose}
+        >
           Cancelar
         </Button>
-      </div>
+      </Box>
     </Modal>
   );
 }

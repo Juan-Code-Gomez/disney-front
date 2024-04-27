@@ -21,14 +21,21 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs";
 import StarRating from "../common/StarRating";
+import EditCreateMovieModal from "../common/EditCreateMovieModal";
+import { Gender } from "../interface/Gender";
 
 function Home() {
   const [movies, setMovies] = useState<Movie[]>([]);
+  const [genders, setGenders] = useState<Gender[]>([]);
   const [filters, setFilters] = useState({
     search: "",
     date: null as string | null,
     rating: "" as number | string,
+    genre: "" as string,
   });
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setFilters({ ...filters, search: event.target.value });
@@ -44,12 +51,25 @@ function Home() {
     setFilters({ ...filters, date: formattedDate });
   };
 
+  const handleGenreChange = (event: SelectChangeEvent<string>) => {
+    setFilters({ ...filters, genre: event.target.value });
+  };
+
   const handleClearFilters = () => {
     // Restablece los filtros a sus valores predeterminados
-    setFilters({ search: "", date: null, rating: "" });
+    setFilters({ search: "", date: null, rating: "", genre: "" });
   };
 
   useEffect(() => {
+
+    API.get<Gender[]>("/gender")
+    .then((response) => {
+      setGenders(response.data);
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+
     const queryParams = new URLSearchParams();
     if (filters.search) {
       queryParams.append("title", filters.search);
@@ -60,6 +80,11 @@ function Home() {
     if (filters.rating !== "") {
       queryParams.append("rating", filters.rating.toString());
     }
+
+    if (filters.genre) {
+      queryParams.append("gender_id", filters.genre);
+    }
+    
     const getMovies = setTimeout(() => {
       API.get<Movie[]>(`/movie?${queryParams.toString()}`)
         .then((resp) => {
@@ -77,8 +102,75 @@ function Home() {
     return () => clearTimeout(getMovies);
   }, [filters]);
 
+  const handleEditClick = (movie: Movie) => {
+    setSelectedMovie(movie);
+    setIsModalOpen(true);
+  };
+
+  const fetchMovies = () => {
+    API.get(`/movie`)
+      .then((resp) => {
+        setMovies(resp.data);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
+  const handleSaveMovie = async (movieData: Movie) => {
+    try {
+      if (movieData.id) {
+        console.log(movieData, "movieData");
+
+        const reponse = await API.put(`/movie/${movieData.id}`, movieData);
+
+        if (reponse.status === 200) {
+          fetchMovies();
+          setIsModalOpen(false);
+        } else {
+          console.log("error al editar");
+        }
+      } else {
+        const response = await API.post("/movie", movieData);
+
+        if (response.status === 201) {
+          fetchMovies();
+
+          setIsModalOpen(false);
+        } else {
+          console.log("error al crear");
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    setIsModalOpen(false);
+  };
+
+  const handleCreateMovie = () => {
+    setSelectedMovie(null); // Establece selectedMovie a null para crear una nueva película
+    setIsModalOpen(true); // Abre el modal
+  };
+
+  const handleDeleteClick = (movie: Movie) => {
+    API.delete(`movie/${movie.id}`).then((resp) => {
+      if (resp.status === 200) {
+        fetchMovies();
+        console.log("Eliminacion con exito");
+      } else {
+        console.log("error al eliminar la pelicula");
+      }
+    });
+  };
+
   return (
     <>
+      <EditCreateMovieModal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        movie={selectedMovie}
+        onSave={handleSaveMovie}
+      />
       <div>
         <Box
           mb={12}
@@ -90,6 +182,14 @@ function Home() {
             zIndex: 10,
           }}
         >
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleCreateMovie}
+            sx={{ marginBottom: 2 }}
+          >
+            Crear nueva película
+          </Button>
           <p>Filtros</p>
           <Toolbar sx={{ display: "flex", gap: 2, alignItems: "center" }}>
             <TextField
@@ -114,6 +214,23 @@ function Home() {
               <MenuItem value={4}>4</MenuItem>
               <MenuItem value={5}>5</MenuItem>
             </Select>
+
+            <Select
+              value={filters.genre}
+              onChange={handleGenreChange}
+              variant="outlined"
+              displayEmpty
+            >
+              <MenuItem value="" disabled>
+                Selecciona un género
+              </MenuItem>
+              {genders.map((gender) => (
+                <MenuItem key={gender.id} value={gender.id}>
+                  {gender.name}
+                </MenuItem>
+              ))}
+            </Select>
+
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DatePicker
                 label="Fecha"
@@ -175,6 +292,24 @@ function Home() {
                       <Typography variant="body2" color="textSecondary">
                         Personajes: {movie.character}
                       </Typography>
+                      <div>
+                        {" "}
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={() => handleEditClick(movie)}
+                          sx={{ marginRight: "1rem" }}
+                        >
+                          Editar
+                        </Button>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={() => handleDeleteClick(movie)}
+                        >
+                          Eliminar
+                        </Button>
+                      </div>
                     </CardContent>
                   </Card>
                 </Grid>
