@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Modal, TextField, Button, Typography } from "@mui/material";
 import API from "../API";
+import { Characters } from "../interface/Character";
 
 interface CreateCharacterModalProps {
   open: boolean;
@@ -13,13 +14,38 @@ interface CreateCharacterModalProps {
     image: string;
     movie: string;
   }) => void;
+  character?: Characters | null;
 }
 
 function CreateCharacterModal({
   open,
   onClose,
   onSave,
+  character
 }: CreateCharacterModalProps) {
+
+  useEffect(() => {
+    if (character) {
+      setNewCharacter({
+        name: character.name,
+        age: character.age,
+        weight: character.weight,
+        history: character.history,
+        image: character.image,
+        movie: character.movie,
+      });
+    } else {
+      setNewCharacter({
+        name: "",
+        age: 0,
+        weight: 0,
+        history: "",
+        image: "",
+        movie: "",
+      });
+    }
+  }, [character]);
+
   const [newCharacter, setNewCharacter] = useState({
     name: "",
     age: 0,
@@ -35,16 +61,28 @@ function CreateCharacterModal({
   };
 
   const handleSave = async () => {
-    console.log(newCharacter, "newCharacter");
-    try {
-      const response = await API.post("/character", newCharacter);
-
-      if (response.status === 201) {
-        onSave(newCharacter);
-        onClose();
+    if (character) {
+      // Lógica para actualizar un personaje existente
+      try {
+        const response = await API.put(`/character/${character.id}`, newCharacter);
+        if (response.status === 200) {
+          onSave(newCharacter);
+          onClose();
+        }
+      } catch (error) {
+        console.error("Error al editar personaje:", error);
       }
-    } catch (error) {
-      console.error("Error al crear personaje:", error);
+    } else {
+      // Lógica existente para crear un nuevo personaje
+      try {
+        const response = await API.post("/character", newCharacter);
+        if (response.status === 201) {
+          onSave(newCharacter);
+          onClose();
+        }
+      } catch (error) {
+        console.error("Error al crear personaje:", error);
+      }
     }
   };
 
@@ -111,7 +149,7 @@ function CreateCharacterModal({
         <Button onClick={handleSave} variant="contained" color="primary">
           Guardar
         </Button>
-        <Button sx={{ margin: "12px" }} variant="contained" color="primary">
+        <Button sx={{ margin: "12px" }} variant="contained" color="primary" onClick={onClose}>
           Cancelar
         </Button>
       </div>

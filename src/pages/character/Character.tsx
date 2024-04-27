@@ -21,6 +21,7 @@ function Character() {
   const [filters, setFilters] = useState({
     name: "",
     age: "" as string | number,
+    movie: ""
   });
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -28,6 +29,9 @@ function Character() {
   const [modalTitle, setModalTitle] = useState("");
   const [modalImage, setModalImage] = useState("");
   const [modalHistory, setModalHistory] = useState("");
+  const [characterToEdit, setCharacterToEdit] = useState<Characters | null>(
+    null
+  );
 
   const openModal = (
     title: string,
@@ -60,25 +64,25 @@ function Character() {
 
   const fetchCharacters = () => {
     API.get(`/character`)
-    .then((resp) => {
+      .then((resp) => {
         setCharacters(resp.data);
-    })
-    .catch((error) => {
+      })
+      .catch((error) => {
         console.error(error);
-    });
-  }
+      });
+  };
   const handleSaveNewCharacter = async (newCharacter: any) => {
     try {
-        const response = await API.post('/character', newCharacter);
-        if (response.status === 201) {
-            // Agregar el nuevo personaje a la lista de personajes
-            setCharacters([...characters, response.data]); // Solo esta línea es necesaria
-            handleCloseCreateModal();
-        }
+      const response = await API.post("/character", newCharacter);
+      if (response.status === 201) {
+        // Agregar el nuevo personaje a la lista de personajes
+        setCharacters([...characters, response.data]); // Solo esta línea es necesaria
+        handleCloseCreateModal();
+      }
     } catch (error) {
-        console.error(error);
+      console.error(error);
     }
-};
+  };
 
   const handleCardClick = (character: Characters) => {
     console.log(character, "character");
@@ -99,8 +103,12 @@ function Character() {
     setFilters({ ...filters, age: event.target.value });
   };
 
+  const handleMovieChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setFilters({ ...filters, movie: event.target.value });
+  };
+
   const handleClearFilters = () => {
-    setFilters({ name: "", age: "" });
+    setFilters({ name: "", age: "", movie: "" });
   };
 
   useEffect(() => {
@@ -114,6 +122,10 @@ function Character() {
       queryParams.append("age", filters.age.toString());
     }
 
+    if (filters.movie) {
+      queryParams.append("movie", filters.movie);
+    }
+
     API.get(`/character?${queryParams.toString()}`)
       .then((resp) => {
         setCharacters(resp.data);
@@ -123,6 +135,22 @@ function Character() {
       });
   }, [filters]);
 
+  const handleOpenEditModal = (character: Characters) => {
+    setCreateModalOpen(true);
+    setCharacterToEdit(character);
+  };
+
+  const deleteCharacter = (id: number) => {
+    API.delete(`character/${id}`)
+      .then((resp) => {
+        if (resp.status === 200) {
+          fetchCharacters();
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
   return (
     <>
       {" "}
@@ -163,6 +191,14 @@ function Character() {
             onChange={handleAgeChange}
           />
 
+          <TextField
+            label="Buscar por serie o pelicula"
+            variant="outlined"
+            margin="normal"
+            value={filters.movie}
+            onChange={handleMovieChange}
+          />
+
           <Button
             variant="contained"
             color="secondary"
@@ -201,6 +237,12 @@ function Character() {
                     <Typography variant="body2" color="textSecondary">
                       Edad: {character.age}
                     </Typography>
+                    <Button onClick={() => handleOpenEditModal(character)}>
+                      Editar
+                    </Button>
+                    <Button onClick={() => deleteCharacter(character.id)}>
+                      Eliminar
+                    </Button>
                   </CardContent>
                 </Card>
               </Grid>
@@ -220,6 +262,7 @@ function Character() {
         open={createModalOpen}
         onClose={handleCloseCreateModal}
         onSave={handleSaveNewCharacter}
+        character={characterToEdit}
       />
     </>
   );
