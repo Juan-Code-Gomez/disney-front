@@ -5,9 +5,9 @@ import "./index.css";
 import { ThemeConfig } from "./config/Theme.config.tsx";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
+  // <React.StrictMode>
     <ThemeConfig>
       <App />
     </ThemeConfig>
-  </React.StrictMode>
+  // </React.StrictMode>
 );

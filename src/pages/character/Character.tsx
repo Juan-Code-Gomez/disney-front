@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 
 import ModalComponent from "../../common/ModalComponent";
+import CreateCharacterModal from "../../common/CreateCharacterModal";
 
 function Character() {
   const [characters, setCharacters] = useState<Characters[]>([]);
@@ -28,24 +29,66 @@ function Character() {
   const [modalImage, setModalImage] = useState("");
   const [modalHistory, setModalHistory] = useState("");
 
-  const openModal = (title: string, content: string, image:string, history: string) => {
-    console.log(image, 'image');
-    
+  const openModal = (
+    title: string,
+    content: string,
+    image: string,
+    history: string
+  ) => {
+    console.log(image, "image");
+
     setModalTitle(title);
     setModalContent(content);
     setModalOpen(true);
-    setModalImage(image)
-    setModalHistory(history)
+    setModalImage(image);
+    setModalHistory(history);
   };
+
+  const [createModalOpen, setCreateModalOpen] = useState(false);
 
   const closeModal = () => {
     setModalOpen(false);
   };
 
+  const handleOpenCreateModal = () => {
+    setCreateModalOpen(true);
+  };
+
+  const handleCloseCreateModal = () => {
+    setCreateModalOpen(false);
+  };
+
+  const fetchCharacters = () => {
+    API.get(`/character`)
+    .then((resp) => {
+        setCharacters(resp.data);
+    })
+    .catch((error) => {
+        console.error(error);
+    });
+  }
+  const handleSaveNewCharacter = async (newCharacter: any) => {
+    try {
+        const response = await API.post('/character', newCharacter);
+        if (response.status === 201) {
+            // Agregar el nuevo personaje a la lista de personajes
+            setCharacters([...characters, response.data]); // Solo esta línea es necesaria
+            handleCloseCreateModal();
+        }
+    } catch (error) {
+        console.error(error);
+    }
+};
+
   const handleCardClick = (character: Characters) => {
-    console.log(character, 'character');
-    
-            openModal(character.name,   `Película: ${character.movie}\nEdad: ${character.age}`, character.image, character.history);
+    console.log(character, "character");
+
+    openModal(
+      character.name,
+      `Película: ${character.movie}\nEdad: ${character.age}`,
+      character.image,
+      character.history
+    );
   };
 
   const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -93,8 +136,16 @@ function Character() {
           zIndex: 10,
         }}
       >
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleOpenCreateModal}
+          style={{ marginBottom: "1rem" }}
+        >
+          Crear personaje
+        </Button>
         <p>Filtros</p>
-        <Toolbar sx={{display: "flex", gap: 2, alignItems: "center"}}>
+        <Toolbar sx={{ display: "flex", gap: 2, alignItems: "center" }}>
           <TextField
             label="Buscar por nombre"
             variant="outlined"
@@ -137,7 +188,7 @@ function Character() {
                     height="200"
                     image={character.image}
                     alt={character.name}
-                    sx={{objectFit: "fill"}}
+                    sx={{ objectFit: "fill" }}
                   />
                   <CardContent>
                     <Typography variant="h6">{character.name}</Typography>
@@ -164,6 +215,11 @@ function Character() {
         image={modalImage}
         content={modalContent}
         history={modalHistory}
+      />
+      <CreateCharacterModal
+        open={createModalOpen}
+        onClose={handleCloseCreateModal}
+        onSave={handleSaveNewCharacter}
       />
     </>
   );
